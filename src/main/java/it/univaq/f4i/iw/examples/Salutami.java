@@ -21,7 +21,6 @@ public class Salutami extends HttpServlet {
     private LocalDateTime startup;
 
     private void action_error(HttpServletRequest request, HttpServletResponse response) {
-        PrintWriter out = null;
         String message = "Unknown error";
         //assumiamo che l'eccezione sia passata tramite gli attributi della request
         //ma per sicurezza controlliamo comunque il tipo effettivo dell'oggetto
@@ -29,6 +28,7 @@ public class Salutami extends HttpServlet {
         //but we always check the real object type
         if (request.getAttribute("exception") instanceof Exception) {
             Exception exception = (Exception) request.getAttribute("exception");
+            message = (exception != null) ? exception.getClass().getSimpleName() : "Unknown exception";
             if (exception != null && exception.getMessage() != null && !exception.getMessage().isEmpty()) {
                 message = exception.getMessage();
             }
@@ -40,9 +40,8 @@ public class Salutami extends HttpServlet {
         //e.g., potremmo mappare solo la classe dell'eccezione (IOException, SQLException, ecc.) in messaggi come "Errore IO", "Errore database", ecc.
         //WARNING: in a production environment, error messages MUST be limited to generic information, not full exception strings
         //e.g., we may map the exception class only (IOException, SQLException, etc.) to messages like "IO Error", "Database Error", etc.
-        try {
+        try (PrintWriter out = response.getWriter()) {
             response.setContentType("text/html;charset=UTF-8");
-            out = response.getWriter();
             HTMLHelpers.printPageHeader(out, "ERROR");
             out.println("<p>" + message + "</p>");
             HTMLHelpers.printPageFooter(out);
@@ -55,10 +54,6 @@ public class Salutami extends HttpServlet {
                 //if ALSO this error status cannot be notified, write to the server log
                 //se ANCHE questo stato di errore non può essere notificato, scriviamo sul log del server
                 Logger.getLogger(Salutami.class.getName()).log(Level.SEVERE, null, ex1);
-            }
-        } finally {
-            if (out != null) {
-                out.close();
             }
         }
     }
