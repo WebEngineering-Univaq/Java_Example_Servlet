@@ -30,7 +30,7 @@ public class Salutami extends HttpServlet {
             Exception exception = (Exception) request.getAttribute("exception");
             message = (exception != null) ? exception.getClass().getSimpleName() : "Unknown exception";
             if (exception != null && exception.getMessage() != null && !exception.getMessage().isEmpty()) {
-                message = exception.getMessage();
+                message += ": " + exception.getMessage();
             }
         }
         //Scriviamo il messaggio di errore nel log del server
